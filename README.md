@@ -2,6 +2,20 @@
 
 Mist é um projeto que tem o objetivo de servir exemplos de como aplicar certas funcionalidades e frameworks a um projeto .NET
 
+### Estrutura do Projeto
+
+```
+├───containers // Projetos WebApi
+│   └───api-auth
+│       └───src
+│           └───Auth.Api.csproj
+├───dotnet-packages
+│   ├───src // Packages de biblioteca de classes
+│   └───test // Packages de teste unitário
+└───dotnet-solutions // Solutions
+    └───Auth.sln
+```
+
 ### Comandos .NET
 
 ###### Solution
