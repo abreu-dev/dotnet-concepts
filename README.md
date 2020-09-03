@@ -126,3 +126,107 @@ public class Startup
     }
 }
 ```
+
+Com as configurações feitas, podemos aplicar o versionamento nas Controllers, da seguinte forma.
+
+###### XptoController.cs
+
+```
+[ApiController]
+[ApiVersion("1.0")]
+[Route("api/v{version:apiVersion}/[controller]")]
+public class XptoController : ControllerBase
+{
+    [HttpGet()]
+    public ActionResult Get()
+    {
+        return Ok();
+    }
+}
+```
+
+Seu endpoint será "https://host:porta/api/v1/xpto".
+
+### AppSettings para cada ambiente
+
+Podemos criar um arquivo appsettings.json para cada ambiente, no caso teriamos um arquivo appsettings.json geral e outro arquivo appsettings.Development.json para o ambiente de desenvolvimento. As configurações de mesma chave do appsettings.Development.json vão sobrescrever as da appsettings.json.
+
+###### appsettings.json
+
+```
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft": "Debug",
+      "Microsoft.Hosting.Lifetime": "Debug"
+    }
+  }
+}
+```
+
+###### appsettings.Development.json
+
+```
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Debug"
+    }
+  },
+  "AllowedHosts": "*"
+}
+```
+
+###### Startup.cs
+
+```
+public class Startup
+{
+    public IConfiguration Configuration { get; }
+
+    public Startup(IHostEnvironment hostEnvironment)
+    {
+        var builder = new ConfigurationBuilder()
+            .SetBasePath(hostEnvironment.ContentRootPath)
+            .AddJsonFile("appsettings.json", true, true)
+            .AddJsonFile($"appsettings.{hostEnvironment.EnvironmentName}.json", true, true)
+            .AddEnvironmentVariables();
+
+        Configuration = builder.Build();
+    }
+}
+```
+
+Neste caso quando obtermos as configurações do IConfiguration, teremos o seguinte.
+
+```
+Logging:LogLevel:Default = "Debug"
+Logging:LogLevel:Microsoft = "Debug"
+Logging:LogLevel:Microsoft.Hosting.Lifetime = "Debug"
+AllowedHosts = "*"
+```
+
+Podemos ver que a key "Logging:LogLevel:Default" foi sobrescrita, a key "AllowedHost" foi criada e o restante das keys foram mantidas como estavam no appsettings.json.
+
+### Health Check
+
+Health Check é um endpoint com um Get simples para checar se a aplicação está em pé. Basta criar uma controller com um método Get que retorna Ok().
+
+###### HealthCheckController.cs
+
+```
+[ApiController]
+[ApiVersion("1.0")]
+[Route("api/v{version:apiVersion}")]
+public class HealthCheckController : ControllerBase
+{
+    [HttpGet()]
+    public ActionResult Get()
+    {
+        return Ok();
+    }
+}
+```
+
+Pode chamar por "https://host:porta/api/v1", se a resposta por 200, significa que a aplicação está em pé.
