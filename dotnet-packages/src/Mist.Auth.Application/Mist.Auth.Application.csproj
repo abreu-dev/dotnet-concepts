@@ -4,4 +4,16 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="3.1.7" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.7.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Mist.Auth.Domain\Mist.Auth.Domain.csproj" />
+    <ProjectReference Include="..\Mist.Auth.Infra.Data\Mist.Auth.Infra.Data.csproj" />
+    <ProjectReference Include="..\Mist.Auth.Infra\Mist.Auth.Infra.csproj" />
+  </ItemGroup>
+
 </Project>

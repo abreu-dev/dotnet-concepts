@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+using Mist.Auth.Infra.Configuration;
 using System.Text;
 
 namespace Auth.Api.Configuration
@@ -11,6 +12,8 @@ namespace Auth.Api.Configuration
         public static IServiceCollection AddJwtConfiguration(this IServiceCollection services, IConfiguration configuration)
         {
             var appSettingsSection = configuration.GetSection("AppSettings");
+            services.Configure<AppSettings>(appSettingsSection);
+            var appSettings = appSettingsSection.Get<AppSettings>();
 
             services.AddAuthentication(x =>
             {
@@ -23,11 +26,11 @@ namespace Auth.Api.Configuration
                 x.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(appSettingsSection["Secret"])),
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(appSettings.Secret)),
                     ValidateIssuer = true,
                     ValidateAudience = true,
-                    ValidAudience = appSettingsSection["ValidoEm"],
-                    ValidIssuer = appSettingsSection["Emissor"]
+                    ValidAudience = appSettings.ValidoEm,
+                    ValidIssuer = appSettings.Emissor
                 };
             });
 
