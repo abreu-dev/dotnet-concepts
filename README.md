@@ -253,6 +253,7 @@ Identity é uma forma de gerenciamento de acessos. Para configurar, é necessár
 
 ```
 Microsoft.AspNetCore.Identity.UI
+Microsoft.AspNetCore.Identity.EntityFrameworkCore
 ```
 
 ###### ApplicationDbContext.cs
