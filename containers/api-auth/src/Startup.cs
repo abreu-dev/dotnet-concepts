@@ -26,6 +26,7 @@ namespace Auth.Api
         {
             services.AddControllers();
             services.AddIdentityConfiguration(Configuration);
+            services.AddJwtConfiguration(Configuration);
             services.WebApiConfig();
         }
 
