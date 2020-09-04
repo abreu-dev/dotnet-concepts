@@ -244,3 +244,106 @@ public class HealthCheckController : ControllerBase
 ```
 
 Pode chamar por "https://host:porta/api/v1", se a resposta por 200, significa que a aplicação está em pé.
+
+### Microsoft Identity
+
+Identity é uma forma de gerenciamento de acessos. Para configurar, é necessário realizar as seguintes configurações.
+
+##### Packages
+
+```
+Microsoft.AspNetCore.Identity.UI
+```
+
+###### ApplicationDbContext.cs
+
+```
+public class ApplicationDbContext : IdentityDbContext
+{
+    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
+}
+```
+
+###### IdentityConfig.cs
+
+```
+public static class IdentityConfig
+{
+    public static IServiceCollection AddIdentityConfiguration(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddDbContext<ApplicationDbContext>(options =>
+            options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+
+        services.AddDefaultIdentity<IdentityUser>()
+            .AddEntityFrameworkStores<ApplicationDbContext>();
+
+        return services;
+    }
+}
+```
+
+###### Startup.cs
+
+```
+public class Startup
+{
+    public void ConfigureServices(IServiceCollection services)
+    {
+        services.AddIdentityConfiguration(Configuration);
+    }
+}
+```
+
+###### AuthController.cs
+
+```
+[ApiController]
+[ApiVersion("1.0")]
+[Route("api/v{version:apiVersion}")]
+public class AuthController : ControllerBase
+{
+    private readonly SignInManager<IdentityUser> _signInManager;
+    private readonly UserManager<IdentityUser> _userManager;
+
+    public AuthController(SignInManager<IdentityUser> signInManager,
+                          UserManager<IdentityUser> userManager)
+    {
+        _signInManager = signInManager;
+        _userManager = userManager;
+    }
+	
+    [HttpPost("entrar")]
+    public async Task<ActionResult> Login(LoginUserViewModel loginUser) // Uma classe simples com Email e Password
+    {
+        var result = await _signInManager.PasswordSignInAsync(loginUser.Email, loginUser.Password, false, true);
+	
+	if (result.Succeeded) return Ok();
+	
+	return BadRequest();
+    }
+
+    [HttpPost("registrar")]
+    public async Task<ActionResult> Registrar(RegisterUserViewModel registerUser) // Uma classe simples com Email e Password
+    {
+        var user = new IdentityUser
+        {
+            UserName = registerUser.Email,
+            Email = registerUser.Email,
+            EmailConfirmed = true
+        };
+
+        var result = await _userManager.CreateAsync(user, registerUser.Password);
+
+        if (result.Succeeded)
+        {
+            await _signInManager.SignInAsync(user, false);
+	    return Ok();
+	}
+	
+	return BadRequest();
+    }
+}
+```
+
+Por padrão são configuradas validações sobre senha (quantos caracteres, quais caracteres, etc), email (caracteres permitidos, tamanho, etc) e também sobre segunda validação, autenticador, confirmação de email, timeout, etc.
+
