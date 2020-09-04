@@ -5,6 +5,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="MediatR" Version="8.1.0" />
+    <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="8.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.1.7" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="3.1.7" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="4.1.1" />
@@ -17,12 +19,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Controllers\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\..\..\dotnet-packages\src\Mist.Auth.Application\Mist.Auth.Application.csproj" />
+    <ProjectReference Include="..\..\..\dotnet-packages\src\Mist.Auth.Domain\Mist.Auth.Domain.csproj" />
     <ProjectReference Include="..\..\..\dotnet-packages\src\Mist.Auth.Infra.Data\Mist.Auth.Infra.Data.csproj" />
+    <ProjectReference Include="..\..\..\dotnet-packages\src\Mist.Auth.Infra\Mist.Auth.Infra.csproj" />
   </ItemGroup>
 
 
