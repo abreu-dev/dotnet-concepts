@@ -2,10 +2,6 @@
 using Mist.Auth.Domain.Entities;
 using Mist.Auth.Domain.Repositories;
 using Mist.Auth.Infra.Data.Context;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Mist.Auth.Infra.Data.Repositories

@@ -37,27 +37,27 @@ namespace Mist.Auth.Application.Services
 
         public async Task<LoginResponseViewModel> LoginAsync(LoginUserViewModel loginUser)
         {
-            var autenticado = await _userRepository.AuthenticateAsync(loginUser.Email, loginUser.Password);
+            var authenticated = await _userRepository.AuthenticateAsync(loginUser.Email, loginUser.Password);
 
-            if (autenticado)
+            if (authenticated)
             {
                 return new LoginResponseViewModel() 
                 { 
                     Success = true,
-                    Data = await ObterTokenAsync(loginUser.Email)
+                    Data = await GetTokenAsync(loginUser.Email)
                 };
             }
 
             return new LoginResponseViewModel()
             {
                 Success = false,
-                Errors = new List<string> { "Email ou senha inválidos." }
+                Errors = new List<string> { "Invalid email or password." }
             };
         }
 
-        public async Task RegistrarAsync(RegisterUserViewModel registerUser)
+        public async Task RegisterAsync(RegisterUserViewModel registerUser)
         {
-            var command = new RegistrarUserCommand()
+            var command = new RegisterUserCommand()
             {
                 Entity = new User
                 {
@@ -72,18 +72,18 @@ namespace Mist.Auth.Application.Services
                 return;
             }
 
-            var listaUser = await _userRepository.ObterTodos();
+            var users = await _userRepository.GetAllAsync();
 
-            if (listaUser.Any(u => u.Email == command.Entity.Email))
+            if (users.Any(u => u.Email == command.Entity.Email))
             {
-                await _mediatorHandler.RaiseDomainNotificationAsync(new DomainNotification(command.MessageType, "Email já cadastrado."));
+                await _mediatorHandler.RaiseDomainNotificationAsync(new DomainNotification(command.MessageType, "Email is already in use."));
                 return;
             }
 
-            await _userRepository.Adicionar(command.Entity);
+            await _userRepository.AddAsync(command.Entity);
         }
 
-        private async Task<JwtDataViewModel> ObterTokenAsync(string email)
+        private async Task<JwtDataViewModel> GetTokenAsync(string email)
         {
             var user = await _userRepository.FindByEmailAsync(email);
 
@@ -99,10 +99,10 @@ namespace Mist.Auth.Application.Services
             var key = Encoding.ASCII.GetBytes(_appSettings.Secret);
             var token = tokenHandler.CreateToken(new SecurityTokenDescriptor
             {
-                Issuer = _appSettings.Emissor,
-                Audience = _appSettings.ValidoEm,
+                Issuer = _appSettings.Issuer,
+                Audience = _appSettings.Audience,
                 Subject = identityClaims,
-                Expires = DateTime.UtcNow.AddHours(_appSettings.ExpiracaoHoras),
+                Expires = DateTime.UtcNow.AddHours(_appSettings.Expires),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             });
 

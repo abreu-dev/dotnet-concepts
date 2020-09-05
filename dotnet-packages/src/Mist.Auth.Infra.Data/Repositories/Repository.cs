@@ -18,18 +18,18 @@ namespace Mist.Auth.Infra.Data.Repositories
             DbSet = db.Set<TEntity>();
         }
 
-        public virtual async Task Adicionar(TEntity entity)
+        public virtual async Task AddAsync(TEntity entity)
         {
             DbSet.Add(entity);
-            await SaveChanges();
+            await SaveChangesAsync();
         }
 
-        public virtual async Task<IEnumerable<TEntity>> ObterTodos()
+        public virtual async Task<IEnumerable<TEntity>> GetAllAsync()
         {
             return await DbSet.ToListAsync();
         }
 
-        public async Task<int> SaveChanges()
+        public async Task<int> SaveChangesAsync()
         {
             return await Db.SaveChangesAsync();
         }

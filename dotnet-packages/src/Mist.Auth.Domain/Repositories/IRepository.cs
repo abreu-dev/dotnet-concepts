@@ -7,8 +7,8 @@ namespace Mist.Auth.Domain.Repositories
 {
     public interface IRepository<TEntity> : IDisposable where TEntity : Entity
     {
-        Task Adicionar(TEntity entity);
-        Task<IEnumerable<TEntity>> ObterTodos();
-        Task<int> SaveChanges();
+        Task AddAsync(TEntity entity);
+        Task<IEnumerable<TEntity>> GetAllAsync();
+        Task<int> SaveChangesAsync();
     }
 }

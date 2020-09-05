@@ -22,7 +22,7 @@ namespace Auth.Api.V1.Controllers
             _userAppService = userAppService;
         }
 
-        [HttpPost("entrar")]
+        [HttpPost("login")]
         public async Task<ActionResult> Login(LoginUserViewModel loginUser)
         {
             if (!ModelState.IsValid) return CustomResponse(ModelState);
@@ -45,12 +45,17 @@ namespace Auth.Api.V1.Controllers
             });
         }
 
-        [HttpPost("registrar")]
-        public async Task<ActionResult> Registrar(RegisterUserViewModel registerUser)
+        [HttpPost("register")]
+        public async Task<ActionResult> Register(RegisterUserViewModel registerUser)
         {
             if (!ModelState.IsValid) return CustomResponse(ModelState);
 
-            await _userAppService.RegistrarAsync(registerUser);
+            await _userAppService.RegisterAsync(registerUser);
+
+            if (ValidOperation())
+            {
+                return await Login(new LoginUserViewModel() { Email = registerUser.Email, Password = registerUser.Password });
+            }
 
             return CustomResponse();
         }

@@ -34,9 +34,9 @@ namespace Mist.Auth.Application.Tests.Services
             var appSettings = new AppSettings()
             {
                 Secret = "TESTETESTETESTETESTE",
-                ExpiracaoHoras = 1,
-                Emissor = "TESTE",
-                ValidoEm = "TESTE"
+                Expires = 1,
+                Issuer = "TESTE",
+                Audience = "TESTE"
             };
             _appSettings = Options.Create(appSettings);
 
@@ -83,7 +83,7 @@ namespace Mist.Auth.Application.Tests.Services
             var response = await _userAppService.LoginAsync(loginViewModel);
 
             response.Success.Should().BeFalse();
-            response.Errors.Should().BeEquivalentTo(new List<string> { "Email ou senha inválidos." });
+            response.Errors.Should().BeEquivalentTo(new List<string> { "Invalid email or password." });
             response.Data.Should().BeNull();
         }
 
@@ -96,11 +96,11 @@ namespace Mist.Auth.Application.Tests.Services
                 Password = "123456"
             };
 
-            _userRepository.ObterTodos().Returns(new List<User>());
+            _userRepository.GetAllAsync().Returns(new List<User>());
 
-            await _userAppService.RegistrarAsync(registerViewModel);
+            await _userAppService.RegisterAsync(registerViewModel);
 
-            var command = new RegistrarUserCommand()
+            var command = new RegisterUserCommand()
             {
                 Entity = new User
                 {
@@ -112,7 +112,7 @@ namespace Mist.Auth.Application.Tests.Services
             await _mediatorHandler
                     .Received(1)
                     .RaiseDomainNotificationAsync(Arg.Is<DomainNotification>(dm =>
-                        dm.Key == command.MessageType && dm.Value == "Email em formato inválido."));
+                        dm.Key == command.MessageType && dm.Value == "Invalid email format."));
         }
 
         [Fact]
@@ -124,9 +124,9 @@ namespace Mist.Auth.Application.Tests.Services
                 Password = "123456"
             };
 
-            _userRepository.ObterTodos().Returns(new List<User>());
+            _userRepository.GetAllAsync().Returns(new List<User>());
 
-            await _userAppService.RegistrarAsync(registerViewModel);
+            await _userAppService.RegisterAsync(registerViewModel);
 
             await _mediatorHandler.DidNotReceive().RaiseDomainNotificationAsync(Arg.Any<DomainNotification>());
         }

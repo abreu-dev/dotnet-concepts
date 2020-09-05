@@ -29,8 +29,8 @@ namespace Auth.Api.Configuration
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(appSettings.Secret)),
                     ValidateIssuer = true,
                     ValidateAudience = true,
-                    ValidAudience = appSettings.ValidoEm,
-                    ValidIssuer = appSettings.Emissor
+                    ValidAudience = appSettings.Audience,
+                    ValidIssuer = appSettings.Issuer
                 };
             });
 

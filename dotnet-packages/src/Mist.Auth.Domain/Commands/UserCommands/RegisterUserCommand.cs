@@ -3,14 +3,14 @@ using System;
 
 namespace Mist.Auth.Domain.Commands.UserCommands
 {
-    public class RegistrarUserCommand : UserCommand<RegistrarUserCommand>
+    public class RegisterUserCommand : UserCommand<RegisterUserCommand>
     {
-        public RegistrarUserCommand()
+        public RegisterUserCommand()
             : base(Guid.Empty) { }
 
         public override bool IsValid()
         {
-            ValidationResult = new RegistrarUserCommandValidator().Validate(this);
+            ValidationResult = new RegisterUserCommandValidator().Validate(this);
             return ValidationResult.IsValid;
         }
     }
