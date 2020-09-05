@@ -27,14 +27,22 @@ namespace Auth.Api.V1.Controllers
         {
             if (!ModelState.IsValid) return CustomResponse(ModelState);
 
-            var succeeded = await _userAppService.LoginAsync(loginUser);
+            var response = await _userAppService.LoginAsync(loginUser);
 
-            if (succeeded)
+            if (response.Success)
             {
-                return CustomResponse(await _userAppService.ObterJwtAsync(loginUser.Email));
+                return Ok(new
+                {
+                    success = true,
+                    data = response.Data
+                });
             }
 
-            return CustomResponse();
+            return Unauthorized(new
+            {
+                success = false,
+                errors = response.Errors
+            });
         }
 
         [HttpPost("registrar")]
@@ -42,12 +50,7 @@ namespace Auth.Api.V1.Controllers
         {
             if (!ModelState.IsValid) return CustomResponse(ModelState);
 
-            var succeeded = await _userAppService.RegistrarAsync(registerUser);
-
-            if (succeeded)
-            {
-                return CustomResponse(await _userAppService.ObterJwtAsync(registerUser.Email));
-            }
+            await _userAppService.RegistrarAsync(registerUser);
 
             return CustomResponse();
         }

@@ -1,13 +1,19 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Mist.Auth.Application.Interfaces;
 using Mist.Auth.Application.ViewModels;
+using Mist.Auth.Domain.Commands;
+using Mist.Auth.Domain.Commands.UserCommands;
+using Mist.Auth.Domain.Entities;
 using Mist.Auth.Domain.Mediator;
 using Mist.Auth.Domain.Notifications;
+using Mist.Auth.Domain.Repositories;
 using Mist.Auth.Infra.Configuration;
 using System;
+using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,68 +23,74 @@ namespace Mist.Auth.Application.Services
     public class UserAppService : IUserAppService
     {
         private readonly IMediatorHandler _mediatorHandler;
+        private readonly IUserRepository _userRepository;
         private readonly AppSettings _appSettings;
-        private readonly SignInManager<IdentityUser> _signInManager;
-        private readonly UserManager<IdentityUser> _userManager;
 
-        public UserAppService(IMediatorHandler mediatorHandler, 
-                              IOptions<AppSettings> appSettings,
-                              SignInManager<IdentityUser> signInManager,
-                              UserManager<IdentityUser> userManager)
+        public UserAppService(IMediatorHandler mediatorHandler,
+                              IUserRepository userRepository,
+                              IOptions<AppSettings> appSettings)
         {
             _mediatorHandler = mediatorHandler;
+            _userRepository = userRepository;
             _appSettings = appSettings.Value;
-            _signInManager = signInManager;
-            _userManager = userManager;
         }
 
-        public async Task<bool> LoginAsync(LoginUserViewModel loginUser)
+        public async Task<LoginResponseViewModel> LoginAsync(LoginUserViewModel loginUser)
         {
-            var result = await _signInManager.PasswordSignInAsync(loginUser.Email, loginUser.Password, false, true);
+            var autenticado = await _userRepository.AuthenticateAsync(loginUser.Email, loginUser.Password);
 
-            if (!result.Succeeded)
+            if (autenticado)
             {
-                await _mediatorHandler.RaiseDomainNotificationAsync(new DomainNotification("Login", "Usuário ou senha incorretos."));
-                return false;
+                return new LoginResponseViewModel() 
+                { 
+                    Success = true,
+                    Data = await ObterTokenAsync(loginUser.Email)
+                };
             }
 
-            return true;
+            return new LoginResponseViewModel()
+            {
+                Success = false,
+                Errors = new List<string> { "Email ou senha inválidos." }
+            };
         }
 
-        public async Task<bool> RegistrarAsync(RegisterUserViewModel registerUser)
+        public async Task RegistrarAsync(RegisterUserViewModel registerUser)
         {
-            var user = new IdentityUser
+            var command = new RegistrarUserCommand()
             {
-                UserName = registerUser.Email,
-                Email = registerUser.Email,
-                EmailConfirmed = true
+                Entity = new User
+                {
+                    Email = registerUser.Email,
+                    Password = registerUser.Password
+                }
             };
 
-            var result = await _userManager.CreateAsync(user, registerUser.Password);
-
-            if (!result.Succeeded)
+            if (!command.IsValid())
             {
-                foreach (var error in result.Errors)
-                {
-                    await _mediatorHandler.RaiseDomainNotificationAsync(new DomainNotification("Registro", error.Description));
-                }
-                return false;
+                await RaiseValidationErrorsAsync(command);
+                return;
             }
 
-            await _signInManager.SignInAsync(user, false);
-            return true;
+            var listaUser = await _userRepository.ObterTodos();
+
+            if (listaUser.Any(u => u.Email == command.Entity.Email))
+            {
+                await _mediatorHandler.RaiseDomainNotificationAsync(new DomainNotification(command.MessageType, "Email já cadastrado."));
+                return;
+            }
+
+            await _userRepository.Adicionar(command.Entity);
         }
 
-        public async Task<LoginResponseViewModel> ObterJwtAsync(string email)
+        private async Task<JwtDataViewModel> ObterTokenAsync(string email)
         {
-            var user = await _userManager.FindByEmailAsync(email);
+            var user = await _userRepository.FindByEmailAsync(email);
 
-            var claims = await _userManager.GetClaimsAsync(user);
-            claims.Add(new Claim(JwtRegisteredClaimNames.Sub, user.Id));
-            claims.Add(new Claim(JwtRegisteredClaimNames.Email, user.Email));
-            claims.Add(new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()));
-            claims.Add(new Claim(JwtRegisteredClaimNames.Nbf, DateTime.UtcNow.ToString()));
-            claims.Add(new Claim(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString(), ClaimValueTypes.Integer64));
+            var claims = new Claim[]
+            {
+                new Claim(ClaimTypes.Email, user.Email)
+            };
 
             var identityClaims = new ClaimsIdentity();
             identityClaims.AddClaims(claims);
@@ -94,12 +106,21 @@ namespace Mist.Auth.Application.Services
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             });
 
-            var encodedToken = tokenHandler.WriteToken(token);
+            var encondedToken = tokenHandler.WriteToken(token);
 
-            return new LoginResponseViewModel
+            return new JwtDataViewModel
             {
-                AccessToken = encodedToken
+                AccessToken = encondedToken
             };
+        }
+
+        protected async Task RaiseValidationErrorsAsync(Command command)
+        {
+            foreach (var error in command.ValidationResult.Errors)
+            {
+                await _mediatorHandler.RaiseDomainNotificationAsync(new DomainNotification(command.MessageType,
+                    error.ErrorMessage));
+            }
         }
     }
 }

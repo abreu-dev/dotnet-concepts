@@ -5,8 +5,7 @@ namespace Mist.Auth.Application.Interfaces
 {
     public interface IUserAppService
     {
-        Task<bool> LoginAsync(LoginUserViewModel loginUser);
-        Task<bool> RegistrarAsync(RegisterUserViewModel registerUser);
-        Task<LoginResponseViewModel> ObterJwtAsync(string email);
+        Task<LoginResponseViewModel> LoginAsync(LoginUserViewModel loginUser);
+        Task RegistrarAsync(RegisterUserViewModel registerUser);
     }
 }

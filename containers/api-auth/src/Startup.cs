@@ -25,10 +25,9 @@ namespace Auth.Api
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
-            services.AddIdentityConfiguration(Configuration);
             services.AddJwtConfiguration(Configuration);
             services.WebApiConfig();
-            services.ResolveDependencies();
+            services.ResolveDependencies(Configuration);
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
