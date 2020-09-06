@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Mist.Auth.Domain.Exceptions;
 using Newtonsoft.Json;
 using System;
 using System.Net;
@@ -23,13 +24,22 @@ namespace Auth.Api.Middlewares
             }
             catch (Exception ex)
             {
+                var statusCode = (int)HttpStatusCode.InternalServerError;
+                var errorMessage = "An unexpected error has occurred.";
+
+                if (ex is DomainException)
+                {
+                    statusCode = (int)HttpStatusCode.BadRequest;
+                    errorMessage = ex.Message;
+                }
+
                 var body = new
                 {
-                    Error = ex.Message
+                    Error = errorMessage
                 };
 
                 httpContext.Response.ContentType = "application/json";
-                httpContext.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+                httpContext.Response.StatusCode = statusCode;
                 await httpContext.Response.WriteAsync(JsonConvert.SerializeObject(body)).ConfigureAwait(false);
             }
         }

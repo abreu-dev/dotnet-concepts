@@ -12,7 +12,6 @@
   <ItemGroup>
     <ProjectReference Include="..\Mist.Auth.Domain\Mist.Auth.Domain.csproj" />
     <ProjectReference Include="..\Mist.Auth.Infra.Data\Mist.Auth.Infra.Data.csproj" />
-    <ProjectReference Include="..\Mist.Auth.Infra\Mist.Auth.Infra.csproj" />
   </ItemGroup>
 
 </Project>

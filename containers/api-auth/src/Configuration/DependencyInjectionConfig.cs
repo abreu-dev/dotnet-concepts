@@ -7,7 +7,7 @@ using Mist.Auth.Application.Services;
 using Mist.Auth.Domain.Mediator;
 using Mist.Auth.Domain.Notifications;
 using Mist.Auth.Domain.Repositories;
-using Mist.Auth.Infra.Data.Context;
+using Mist.Auth.Infra.Data.Contexts;
 using Mist.Auth.Infra.Data.Repositories;
 
 namespace Auth.Api.Configuration
@@ -16,14 +16,14 @@ namespace Auth.Api.Configuration
     {
         public static IServiceCollection ResolveDependencies(this IServiceCollection services, IConfiguration configuration)
         {
-            // MediatR
-            services.AddScoped<IMediatorHandler, MediatorHandler>();
-            services.AddScoped<INotificationHandler<DomainNotification>, DomainNotificationHandler>();
-
-            services.AddDbContext<ApplicationDbContext>(options =>
+            services.AddDbContext<AuthContext>(options =>
                 options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IUserAppService, UserAppService>();
+
+            services.AddScoped<IMediatorHandler, MediatorHandler>();
+            services.AddScoped<INotificationHandler<DomainNotification>, DomainNotificationHandler>();
 
             return services;
         }

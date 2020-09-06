@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Security.Cryptography;
 
-namespace Mist.Auth.Infra.Data.Cryptography
+namespace Mist.Auth.Infra.Data.Common
 {
     public static class SecurePasswordHasher
     {

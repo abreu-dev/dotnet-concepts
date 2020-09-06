@@ -3,10 +3,11 @@ using Auth.Api.Middlewares;
 using AutoMapper;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Mist.Auth.Application.AutoMapper;
+using Mist.Auth.Infra;
 
 namespace Auth.Api
 {
@@ -33,10 +34,10 @@ namespace Auth.Api
             services.ResolveDependencies(Configuration);
 
             services.AddMediatR(typeof(Startup));
-            services.AddAutoMapper(typeof(AutoMapperConfig));
+            services.AddAutoMapper(typeof(ViewModelToDomainMappingProfile));
         }
 
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app)
         {
             app.UseDeveloperExceptionPage();
             app.UseMiddleware<ExceptionMiddleware>();

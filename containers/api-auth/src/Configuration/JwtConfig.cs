@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
-using Mist.Auth.Infra.Configuration;
+using Mist.Auth.Infra.Data.Common;
 using System.Text;
 
 namespace Auth.Api.Configuration

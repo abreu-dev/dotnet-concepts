@@ -1,5 +1,5 @@
-﻿namespace Mist.Auth.Infra.Configuration
-{
+﻿namespace Mist.Auth.Infra.Data.Common
+{ 
     public class AppSettings
     {
         public string Secret { get; set; }

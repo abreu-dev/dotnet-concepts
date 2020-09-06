@@ -23,7 +23,6 @@
     <ProjectReference Include="..\..\..\dotnet-packages\src\Mist.Auth.Application\Mist.Auth.Application.csproj" />
     <ProjectReference Include="..\..\..\dotnet-packages\src\Mist.Auth.Domain\Mist.Auth.Domain.csproj" />
     <ProjectReference Include="..\..\..\dotnet-packages\src\Mist.Auth.Infra.Data\Mist.Auth.Infra.Data.csproj" />
-    <ProjectReference Include="..\..\..\dotnet-packages\src\Mist.Auth.Infra\Mist.Auth.Infra.csproj" />
   </ItemGroup>
 
 

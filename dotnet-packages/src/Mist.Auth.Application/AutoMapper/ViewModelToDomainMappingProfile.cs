@@ -2,11 +2,11 @@
 using Mist.Auth.Application.ViewModels;
 using Mist.Auth.Domain.Entities;
 
-namespace Auth.Api.Configuration
+namespace Mist.Auth.Application.AutoMapper
 {
-    public class AutoMapperConfig : Profile
+    public class ViewModelToDomainMappingProfile : Profile
     {
-        public AutoMapperConfig()
+        public ViewModelToDomainMappingProfile()
         {
             CreateMap<RegisterUserViewModel, User>();
         }

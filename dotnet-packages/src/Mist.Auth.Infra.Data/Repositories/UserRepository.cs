@@ -1,15 +1,15 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Mist.Auth.Domain.Entities;
 using Mist.Auth.Domain.Repositories;
-using Mist.Auth.Infra.Data.Context;
-using Mist.Auth.Infra.Data.Cryptography;
+using Mist.Auth.Infra.Data.Common;
+using Mist.Auth.Infra.Data.Contexts;
 using System.Threading.Tasks;
 
 namespace Mist.Auth.Infra.Data.Repositories
 {
     public class UserRepository : Repository<User>, IUserRepository
     {
-        public UserRepository(ApplicationDbContext context) : base(context) { }
+        public UserRepository(AuthContext context) : base(context) { }
 
         public async Task<User> FindByEmailAndPasswordAsync(string email, string password)
         {

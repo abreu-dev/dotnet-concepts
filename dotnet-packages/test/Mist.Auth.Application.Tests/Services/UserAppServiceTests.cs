@@ -1,7 +1,7 @@
-﻿using Auth.Api.Configuration;
-using AutoMapper;
+﻿using AutoMapper;
 using FluentAssertions;
 using Microsoft.Extensions.Options;
+using Mist.Auth.Application.AutoMapper;
 using Mist.Auth.Application.Interfaces;
 using Mist.Auth.Application.Services;
 using Mist.Auth.Application.ViewModels;
@@ -9,7 +9,7 @@ using Mist.Auth.Domain.Entities;
 using Mist.Auth.Domain.Mediator;
 using Mist.Auth.Domain.Notifications;
 using Mist.Auth.Domain.Repositories;
-using Mist.Auth.Infra.Configuration;
+using Mist.Auth.Infra.Data.Common;
 using NSubstitute;
 using NSubstitute.ReturnsExtensions;
 using System;
@@ -32,7 +32,7 @@ namespace Mist.Auth.Application.Tests.Services
         {
             _mediatorHandler = Substitute.For<IMediatorHandler>();
             _userRepository = Substitute.For<IUserRepository>();
-            _mapper = new MapperConfiguration(cfg => cfg.AddProfile<AutoMapperConfig>()).CreateMapper();
+            _mapper = new MapperConfiguration(cfg => cfg.AddProfile<ViewModelToDomainMappingProfile>()).CreateMapper();
 
             var appSettings = new AppSettings()
             {

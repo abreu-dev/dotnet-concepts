@@ -7,10 +7,11 @@ using Mist.Auth.Application.ViewModels;
 using Mist.Auth.Domain.Commands;
 using Mist.Auth.Domain.Commands.UserCommands;
 using Mist.Auth.Domain.Entities;
+using Mist.Auth.Domain.Exceptions;
 using Mist.Auth.Domain.Mediator;
 using Mist.Auth.Domain.Notifications;
 using Mist.Auth.Domain.Repositories;
-using Mist.Auth.Infra.Configuration;
+using Mist.Auth.Infra.Data.Common;
 using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
@@ -44,7 +45,7 @@ namespace Mist.Auth.Application.Services
 
             if (user == null)
             {
-                throw new Exception("Invalid email or password.");
+                throw new DomainException("Invalid email or password.");
             }
 
             return GetJwtData(user);
@@ -110,6 +111,11 @@ namespace Mist.Auth.Application.Services
                 await _mediatorHandler.RaiseDomainNotificationAsync(new DomainNotification(command.MessageType,
                     error.ErrorMessage));
             }
+        }
+
+        public void Dispose()
+        {
+            _userRepository?.Dispose();
         }
     }
 }
