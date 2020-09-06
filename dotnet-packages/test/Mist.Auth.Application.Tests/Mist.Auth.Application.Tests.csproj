@@ -16,6 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\containers\api-auth\src\Auth.Api.csproj" />
     <ProjectReference Include="..\..\src\Mist.Auth.Application\Mist.Auth.Application.csproj" />
     <ProjectReference Include="..\..\src\Mist.Auth.Domain\Mist.Auth.Domain.csproj" />
   </ItemGroup>

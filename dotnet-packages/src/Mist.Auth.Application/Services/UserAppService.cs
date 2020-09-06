@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Internal;
+﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Mist.Auth.Application.Interfaces;
@@ -23,14 +24,17 @@ namespace Mist.Auth.Application.Services
     {
         private readonly IMediatorHandler _mediatorHandler;
         private readonly IUserRepository _userRepository;
+        private readonly IMapper _mapper;
         private readonly AppSettings _appSettings;
 
         public UserAppService(IMediatorHandler mediatorHandler,
                               IUserRepository userRepository,
+                              IMapper mapper,
                               IOptions<AppSettings> appSettings)
         {
             _mediatorHandler = mediatorHandler;
             _userRepository = userRepository;
+            _mapper = mapper;
             _appSettings = appSettings.Value;
         }
 
@@ -50,11 +54,7 @@ namespace Mist.Auth.Application.Services
         {
             var command = new RegisterUserCommand()
             {
-                Entity = new User
-                {
-                    Email = registerUser.Email,
-                    Password = registerUser.Password
-                }
+                Entity = _mapper.Map<User>(registerUser)
             };
 
             if (!command.IsValid())

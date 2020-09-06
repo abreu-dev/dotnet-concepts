@@ -1,5 +1,7 @@
 using Auth.Api.Configuration;
 using Auth.Api.Middlewares;
+using AutoMapper;
+using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -29,6 +31,9 @@ namespace Auth.Api
             services.AddJwtConfiguration(Configuration);
             services.WebApiConfig();
             services.ResolveDependencies(Configuration);
+
+            services.AddMediatR(typeof(Startup));
+            services.AddAutoMapper(typeof(AutoMapperConfig));
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

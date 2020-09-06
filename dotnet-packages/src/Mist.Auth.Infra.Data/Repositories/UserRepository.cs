@@ -3,7 +3,6 @@ using Mist.Auth.Domain.Entities;
 using Mist.Auth.Domain.Repositories;
 using Mist.Auth.Infra.Data.Context;
 using Mist.Auth.Infra.Data.Cryptography;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Mist.Auth.Infra.Data.Repositories

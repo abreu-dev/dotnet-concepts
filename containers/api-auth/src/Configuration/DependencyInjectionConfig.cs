@@ -17,7 +17,6 @@ namespace Auth.Api.Configuration
         public static IServiceCollection ResolveDependencies(this IServiceCollection services, IConfiguration configuration)
         {
             // MediatR
-            services.AddMediatR(typeof(Startup));
             services.AddScoped<IMediatorHandler, MediatorHandler>();
             services.AddScoped<INotificationHandler<DomainNotification>, DomainNotificationHandler>();
 

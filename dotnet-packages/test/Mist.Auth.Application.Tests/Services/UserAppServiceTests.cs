@@ -1,4 +1,6 @@
-﻿using FluentAssertions;
+﻿using Auth.Api.Configuration;
+using AutoMapper;
+using FluentAssertions;
 using Microsoft.Extensions.Options;
 using Mist.Auth.Application.Interfaces;
 using Mist.Auth.Application.Services;
@@ -21,6 +23,7 @@ namespace Mist.Auth.Application.Tests.Services
     {
         private readonly IMediatorHandler _mediatorHandler;
         private readonly IUserRepository _userRepository;
+        private readonly IMapper _mapper;
         private readonly IOptions<AppSettings> _appSettings;
 
         private readonly IUserAppService _userAppService;
@@ -29,6 +32,7 @@ namespace Mist.Auth.Application.Tests.Services
         {
             _mediatorHandler = Substitute.For<IMediatorHandler>();
             _userRepository = Substitute.For<IUserRepository>();
+            _mapper = new MapperConfiguration(cfg => cfg.AddProfile<AutoMapperConfig>()).CreateMapper();
 
             var appSettings = new AppSettings()
             {
@@ -39,7 +43,7 @@ namespace Mist.Auth.Application.Tests.Services
             };
             _appSettings = Options.Create(appSettings);
 
-            _userAppService = new UserAppService(_mediatorHandler, _userRepository, _appSettings);
+            _userAppService = new UserAppService(_mediatorHandler, _userRepository, _mapper, _appSettings);
         }
 
         [Fact]
