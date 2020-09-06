@@ -20,29 +20,29 @@ namespace Auth.Api.Controllers
             _mediatorHandler = mediatorHandler;
         }
 
-        protected bool OperacaoValida()
+        protected bool ValidOperation()
         {
             return !_notifications.HasNotifications();
         }
 
-        protected async void NotificarErro(string key, string mensagem)
+        protected async void NotifyError(string key, string mensagem)
         {
             await _mediatorHandler.RaiseDomainNotificationAsync(new DomainNotification(key, mensagem));
         }
 
-        protected void NotificarErroModelInvalida(ModelStateDictionary modelState)
+        protected void NotifyErrorsInvalidModel(ModelStateDictionary modelState)
         {
             var errors = modelState.Values.SelectMany(e => e.Errors);
             foreach (var error in errors)
             {
-                var errorMsg = error.Exception == null ? error.ErrorMessage : error.Exception.Message;
-                NotificarErro("ModelState", errorMsg);
+                var message = error.Exception == null ? error.ErrorMessage : error.Exception.Message;
+                NotifyError("ModelState", message);
             }
         }
 
         protected ActionResult CustomResponse(object result = null)
         {
-            if (OperacaoValida())
+            if (ValidOperation())
             {
                 return Ok(new
                 {
