@@ -3,11 +3,11 @@ using Auth.Api.Middlewares;
 using AutoMapper;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Mist.Auth.Application.AutoMapper;
-using Mist.Auth.Infra;
 
 namespace Auth.Api
 {
@@ -29,19 +29,28 @@ namespace Auth.Api
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+
             services.AddJwtConfiguration(Configuration);
+
             services.WebApiConfig();
+
+            services.AddSwaggerConfig();
+
             services.ResolveDependencies(Configuration);
 
             services.AddMediatR(typeof(Startup));
             services.AddAutoMapper(typeof(ViewModelToDomainMappingProfile));
         }
 
-        public void Configure(IApplicationBuilder app)
+        public void Configure(IApplicationBuilder app, IApiVersionDescriptionProvider provider)
         {
             app.UseDeveloperExceptionPage();
+
             app.UseMiddleware<ExceptionMiddleware>();
+
             app.UseMvcConfiguration();
+
+            app.UseSwaggerConfig(provider);
         }
     }
 }
