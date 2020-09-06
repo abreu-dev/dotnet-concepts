@@ -6,6 +6,7 @@ using Mist.Auth.Application.Interfaces;
 using Mist.Auth.Application.Services;
 using Mist.Auth.Application.ViewModels;
 using Mist.Auth.Domain.Entities;
+using Mist.Auth.Domain.Exceptions;
 using Mist.Auth.Domain.Mediator;
 using Mist.Auth.Domain.Notifications;
 using Mist.Auth.Domain.Repositories;
@@ -163,7 +164,7 @@ namespace Mist.Auth.Application.Tests.Services
 
             _userRepository.FindByEmailAndPasswordAsync(loginUserViewModel.Email, loginUserViewModel.Password).ReturnsNull();
 
-            var exception = await Assert.ThrowsAsync<Exception>(() => _userAppService.LoginAsync(loginUserViewModel));
+            var exception = await Assert.ThrowsAsync<DomainException>(() => _userAppService.LoginAsync(loginUserViewModel));
             exception.Message.Should().Be("Invalid email or password.");
         }
 
