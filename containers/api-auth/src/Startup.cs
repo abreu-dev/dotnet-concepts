@@ -1,4 +1,5 @@
 using Auth.Api.Configuration;
+using Auth.Api.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -33,6 +34,7 @@ namespace Auth.Api
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             app.UseDeveloperExceptionPage();
+            app.UseMiddleware<ExceptionMiddleware>();
             app.UseMvcConfiguration();
         }
     }

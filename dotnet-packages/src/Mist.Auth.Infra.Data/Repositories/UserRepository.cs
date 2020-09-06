@@ -10,9 +10,9 @@ namespace Mist.Auth.Infra.Data.Repositories
     {
         public UserRepository(ApplicationDbContext context) : base(context) { }
 
-        public async Task<bool> AuthenticateAsync(string email, string password)
+        public async Task<User> FindByEmailAndPasswordAsync(string email, string password)
         {
-            return await DbSet.AsNoTracking().AnyAsync(u => u.Email == email && u.Password == password);
+            return await DbSet.AsNoTracking().FirstOrDefaultAsync(u => u.Email == email && u.Password == password);
         }
 
         public async Task<User> FindByEmailAsync(string email)

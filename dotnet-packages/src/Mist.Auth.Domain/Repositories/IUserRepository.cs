@@ -5,7 +5,7 @@ namespace Mist.Auth.Domain.Repositories
 {
     public interface IUserRepository : IRepository<User>
     {
-        Task<bool> AuthenticateAsync(string email, string password);
+        Task<User> FindByEmailAndPasswordAsync(string email, string password);
         Task<User> FindByEmailAsync(string email);
     }
 }

@@ -27,22 +27,7 @@ namespace Auth.Api.V1.Controllers
         {
             if (!ModelState.IsValid) return CustomResponse(ModelState);
 
-            var response = await _userAppService.LoginAsync(loginUser);
-
-            if (response.Success)
-            {
-                return Ok(new
-                {
-                    success = true,
-                    data = response.Data
-                });
-            }
-
-            return Unauthorized(new
-            {
-                success = false,
-                errors = response.Errors
-            });
+            return CustomResponse(await _userAppService.LoginAsync(loginUser));
         }
 
         [HttpPost("register")]

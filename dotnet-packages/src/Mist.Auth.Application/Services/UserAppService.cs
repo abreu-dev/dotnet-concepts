@@ -35,24 +35,16 @@ namespace Mist.Auth.Application.Services
             _appSettings = appSettings.Value;
         }
 
-        public async Task<LoginResponseViewModel> LoginAsync(LoginUserViewModel loginUser)
+        public async Task<JwtResponseViewModel> LoginAsync(LoginUserViewModel loginUser)
         {
-            var authenticated = await _userRepository.AuthenticateAsync(loginUser.Email, loginUser.Password);
+            var user = await _userRepository.FindByEmailAndPasswordAsync(loginUser.Email, loginUser.Password);
 
-            if (authenticated)
+            if (user == null)
             {
-                return new LoginResponseViewModel() 
-                { 
-                    Success = true,
-                    Data = await GetTokenAsync(loginUser.Email)
-                };
+                throw new Exception("Invalid email or password.");
             }
 
-            return new LoginResponseViewModel()
-            {
-                Success = false,
-                Errors = new List<string> { "Invalid email or password." }
-            };
+            return GetJwtData(user);
         }
 
         public async Task RegisterAsync(RegisterUserViewModel registerUser)
@@ -83,10 +75,8 @@ namespace Mist.Auth.Application.Services
             await _userRepository.AddAsync(command.Entity);
         }
 
-        private async Task<JwtDataViewModel> GetTokenAsync(string email)
+        private JwtResponseViewModel GetJwtData(User user)
         {
-            var user = await _userRepository.FindByEmailAsync(email);
-
             var claims = new Claim[]
             {
                 new Claim(ClaimTypes.Email, user.Email)
@@ -108,13 +98,13 @@ namespace Mist.Auth.Application.Services
 
             var encondedToken = tokenHandler.WriteToken(token);
 
-            return new JwtDataViewModel
+            return new JwtResponseViewModel
             {
                 AccessToken = encondedToken
             };
         }
 
-        protected async Task RaiseValidationErrorsAsync(Command command)
+        private async Task RaiseValidationErrorsAsync(Command command)
         {
             foreach (var error in command.ValidationResult.Errors)
             {

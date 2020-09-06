@@ -3,14 +3,13 @@ using Microsoft.Extensions.Options;
 using Mist.Auth.Application.Interfaces;
 using Mist.Auth.Application.Services;
 using Mist.Auth.Application.ViewModels;
-using Mist.Auth.Domain.Commands.UserCommands;
 using Mist.Auth.Domain.Entities;
 using Mist.Auth.Domain.Mediator;
 using Mist.Auth.Domain.Notifications;
 using Mist.Auth.Domain.Repositories;
 using Mist.Auth.Infra.Configuration;
 using NSubstitute;
-using NSubstitute.ReceivedExtensions;
+using NSubstitute.ReturnsExtensions;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -33,10 +32,10 @@ namespace Mist.Auth.Application.Tests.Services
 
             var appSettings = new AppSettings()
             {
-                Secret = "TESTETESTETESTETESTE",
+                Secret = "UserAppServiceTest",
                 Expires = 1,
-                Issuer = "TESTE",
-                Audience = "TESTE"
+                Issuer = "UserAppServiceTest",
+                Audience = "UserAppServiceTest"
             };
             _appSettings = Options.Create(appSettings);
 
@@ -44,91 +43,145 @@ namespace Mist.Auth.Application.Tests.Services
         }
 
         [Fact]
-        public async Task LoginDevePassar()
+        public async Task GivenRegisterAsync_WhenEmptyEmail_ThenRaiseDomainNotification()
         {
-            var loginViewModel = new LoginUserViewModel()
+            var registerUserViewModel = new RegisterUserViewModel()
             {
-                Email = "example@example.com",
-                Password = "123456"
+                Email = "",
+                Password = "test123"
             };
 
-            _userRepository.AuthenticateAsync(loginViewModel.Email, loginViewModel.Password).Returns(true);
+            await _userAppService.RegisterAsync(registerUserViewModel);
+
+            await _mediatorHandler
+                .Received(1)
+                .RaiseDomainNotificationAsync(Arg.Is<DomainNotification>(dm =>
+                    dm.Key == "RegisterUserCommand" && dm.Value == "Email required."));
+        }
+
+        [Fact]
+        public async Task GivenRegisterAsync_WhenInvalidEmail_ThenRaiseDomainNotification()
+        {
+            var registerUserViewModel = new RegisterUserViewModel()
+            {
+                Email = "test.com",
+                Password = "test123"
+            };
+
+            await _userAppService.RegisterAsync(registerUserViewModel);
+
+            await _mediatorHandler
+                .Received(1)
+                .RaiseDomainNotificationAsync(Arg.Is<DomainNotification>(dm =>
+                    dm.Key == "RegisterUserCommand" && dm.Value == "Invalid email format."));
+        }
+
+        [Fact]
+        public async Task GivenRegisterAsync_WhenEmptyPassword_ThenRaiseDomainNotification()
+        {
+            var registerUserViewModel = new RegisterUserViewModel()
+            {
+                Email = "test@teste.com",
+                Password = ""
+            };
+
+            await _userAppService.RegisterAsync(registerUserViewModel);
+
+            await _mediatorHandler
+                .Received(1)
+                .RaiseDomainNotificationAsync(Arg.Is<DomainNotification>(dm =>
+                    dm.Key == "RegisterUserCommand" && dm.Value == "Password required."));
+        }
+
+        [Theory]
+        [InlineData("1234")]
+        [InlineData("1234567891234567")]
+        public async Task GivenRegisterAsync_WhenPasswordIsNotBetweenFiveAndFifteenCharacters_ThenRaiseDomainNotification(string password)
+        {
+            var registerUserViewModel = new RegisterUserViewModel()
+            {
+                Email = "test@teste.com",
+                Password = password
+            };
+
+            await _userAppService.RegisterAsync(registerUserViewModel);
+
+            await _mediatorHandler
+                .Received(1)
+                .RaiseDomainNotificationAsync(Arg.Is<DomainNotification>(dm =>
+                    dm.Key == "RegisterUserCommand" && dm.Value == "Password must be between 5 and 15 characters."));
+        }
+
+        [Fact]
+        public async Task GivenRegisterAsync_WhenEmailAlreadyInUse_ThenRaiseDomainNotification()
+        {
+            var registerUserViewModel = new RegisterUserViewModel()
+            {
+                Email = "test@test.com",
+                Password = "test123"
+            };
+
+            _userRepository.GetAllAsync().Returns(new List<User> { new User() { Email = registerUserViewModel.Email } });
+            await _userAppService.RegisterAsync(registerUserViewModel);
+
+            await _mediatorHandler
+                .Received(1)
+                .RaiseDomainNotificationAsync(Arg.Is<DomainNotification>(dm =>
+                    dm.Key == "RegisterUserCommand" && dm.Value == "Email is already in use."));
+        }
+
+        [Fact]
+        public async Task GivenRegisterAsync_WhenThereIsNoErrors_ThenCallRepositoryAddAsync()
+        {
+            var registerUserViewModel = new RegisterUserViewModel()
+            {
+                Email = "test@test.com",
+                Password = "test123"
+            };
+
+            _userRepository.GetAllAsync().Returns(new List<User>());
+            await _userAppService.RegisterAsync(registerUserViewModel);
+
+            await _userRepository
+                .Received(1)
+                .AddAsync(Arg.Is<User>(u =>
+                    u.Email == registerUserViewModel.Email && u.Password == registerUserViewModel.Password));
+        }
+
+        [Fact]
+        public async Task GivenLoginAsync_WhenUserIsNotRegistered_ThenThrowException()
+        {
+            var loginUserViewModel = new LoginUserViewModel()
+            {
+                Email = "test@test.com",
+                Password = "test123"
+            };
+
+            _userRepository.FindByEmailAndPasswordAsync(loginUserViewModel.Email, loginUserViewModel.Password).ReturnsNull();
+
+            var exception = await Assert.ThrowsAsync<Exception>(() => _userAppService.LoginAsync(loginUserViewModel));
+            exception.Message.Should().Be("Invalid email or password.");
+        }
+
+        [Fact]
+        public async Task GivenLoginAsync_WhenThereIsNoErrors_ThenReturnsAccessToken()
+        {
+            var loginUserViewModel = new LoginUserViewModel()
+            {
+                Email = "test@test.com",
+                Password = "test123"
+            };
 
             var user = new User()
             {
-                Id = Guid.NewGuid(),
-                Email = loginViewModel.Email,
-                Password = loginViewModel.Password
-            };
-            _userRepository.FindByEmailAsync(loginViewModel.Email).Returns(user);
-
-            var response = await _userAppService.LoginAsync(loginViewModel);
-
-            response.Success.Should().BeTrue();
-            response.Data.Should().NotBeNull();
-            response.Errors.Should().BeNull();
-        }
-
-        [Fact]
-        public async Task LoginDeveFalhar()
-        {
-            var loginViewModel = new LoginUserViewModel()
-            {
-                Email = "example@example.com",
-                Password = "123456"
+                Email = loginUserViewModel.Email,
+                Password = loginUserViewModel.Password
             };
 
-            _userRepository.AuthenticateAsync(loginViewModel.Email, loginViewModel.Password).Returns(false);
+            _userRepository.FindByEmailAndPasswordAsync(loginUserViewModel.Email, loginUserViewModel.Password).Returns(user);
 
-            var response = await _userAppService.LoginAsync(loginViewModel);
-
-            response.Success.Should().BeFalse();
-            response.Errors.Should().BeEquivalentTo(new List<string> { "Invalid email or password." });
-            response.Data.Should().BeNull();
-        }
-
-        [Fact] 
-        public async Task RegistroDeveFalharFormatoEmail()
-        {
-            var registerViewModel = new RegisterUserViewModel()
-            {
-                Email = "example",
-                Password = "123456"
-            };
-
-            _userRepository.GetAllAsync().Returns(new List<User>());
-
-            await _userAppService.RegisterAsync(registerViewModel);
-
-            var command = new RegisterUserCommand()
-            {
-                Entity = new User
-                {
-                    Email = registerViewModel.Email,
-                    Password = registerViewModel.Password
-                }
-            };
-
-            await _mediatorHandler
-                    .Received(1)
-                    .RaiseDomainNotificationAsync(Arg.Is<DomainNotification>(dm =>
-                        dm.Key == command.MessageType && dm.Value == "Invalid email format."));
-        }
-
-        [Fact]
-        public async Task RegistroDevePassar()
-        {
-            var registerViewModel = new RegisterUserViewModel()
-            {
-                Email = "example@example.com",
-                Password = "123456"
-            };
-
-            _userRepository.GetAllAsync().Returns(new List<User>());
-
-            await _userAppService.RegisterAsync(registerViewModel);
-
-            await _mediatorHandler.DidNotReceive().RaiseDomainNotificationAsync(Arg.Any<DomainNotification>());
+            var response = await _userAppService.LoginAsync(loginUserViewModel);
+            response.AccessToken.Should().NotBeNullOrEmpty();
         }
     }
 }
