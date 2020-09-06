@@ -1,5 +1,5 @@
 using Auth.Api.Configuration;
-using Auth.Api.Extensions;
+using Auth.Api.Middlewares;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
