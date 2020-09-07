@@ -17,7 +17,7 @@ Mist é um projeto que tem o objetivo de servir exemplos de como aplicar certas 
 - Obter dados do appsettings com IOptions;
 - Arquivo appsettings para cada ambiente;
 - Commands e Validators;
-- Testes unitários;
+- Testes unitários com Xunit e NSubstitute;
 
 ### Estrutura do Projeto
 
