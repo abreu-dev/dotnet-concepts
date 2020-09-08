@@ -1,6 +1,23 @@
 # **Mist**
 
-Mist é um projeto que tem o objetivo de servir exemplos de como aplicar certas funcionalidades e frameworks a um projeto .NET
+Mist é um projeto que tem o objetivo de servir exemplos de como aplicar certas funcionalidades e frameworks a um projeto .NET. Até o presente momento, estes foram os pontos implementados:
+
+- Estrutura de camadas;
+- Versionamento de API;
+- Token de autenticação com JWT;
+- AutoMapper;
+- Swagger;
+- Gerenciamento de acessos com Microsoft Identity;
+- Gerenciamento de acessos personalizado;
+- Hash de Senha com Salt e Iterations;
+- Injeção de Dependência por contexto;
+- MediatR;
+- Middleware;
+- EF Core;
+- Obter dados do appsettings com IOptions;
+- Arquivo appsettings para cada ambiente;
+- Commands e Validators;
+- Testes unitários com Xunit e NSubstitute;
 
 ### Estrutura do Projeto
 
