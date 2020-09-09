@@ -39,7 +39,7 @@ namespace Mist.Auth.Application.Services
             _appSettings = appSettings.Value;
         }
 
-        public async Task<JwtResponseViewModel> LoginAsync(LoginUserViewModel loginUser)
+        public async Task<LoginResponseViewModel> LoginAsync(LoginUserViewModel loginUser)
         {
             var user = await _userRepository.FindByEmailAndPasswordAsync(loginUser.Email, loginUser.Password);
 
@@ -75,7 +75,7 @@ namespace Mist.Auth.Application.Services
             await _userRepository.AddAsync(command.Entity);
         }
 
-        private JwtResponseViewModel GetJwtData(User user)
+        private LoginResponseViewModel GetJwtData(User user)
         {
             var claims = new Claim[]
             {
@@ -98,9 +98,13 @@ namespace Mist.Auth.Application.Services
 
             var encondedToken = tokenHandler.WriteToken(token);
 
-            return new JwtResponseViewModel
+            return new LoginResponseViewModel
             {
-                AccessToken = encondedToken
+                AccessToken = encondedToken,
+                UserToken = new UserTokenViewModel
+                {
+                    Email = user.Email
+                }
             };
         }
 

@@ -1,0 +1,28 @@
+<div class="container main-container">
+    <h1>Login</h1>
+
+    <form novalidate (ngSubmit)="login()" [formGroup]="loginForm">
+        <h4>Entre na sua conta</h4>
+        <hr>
+
+        <div class="form-group">
+            <label class="col-md-2 control-label">Email</label>
+            <div class="col-md-10">
+                <input class="form-control" id="email" type="text" placeholder="Email (requerido)" formControlName="email"/>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-md-2 control-label">Senha</label>
+            <div class="col-md-10">
+                <input class="form-control" id="password" type="password" placeholder="Senha (requerido)" formControlName="password"/>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-4 col-md-offset-2">
+                <span><button class="btn btn-success" id="Login" [disabled]="!loginForm.valid" type="submit">Login</button></span>
+            </div>
+        </div>
+    </form>
+</div>
